@@ -7,7 +7,7 @@ data class ReporteDto(
     val categoria: String,
     val ubicacion: String,
     val estado: String,
-    val fecha: String
+    val fecha: String? // MockAPI no envía este campo
 )
 
 //BASE URL = https://api.ejemplo.com/

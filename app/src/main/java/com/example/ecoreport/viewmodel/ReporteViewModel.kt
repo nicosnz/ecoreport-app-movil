@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecoreport.data.ReporteEntity
 import com.example.ecoreport.data.remote.ReporteDto
 import com.example.ecoreport.repository.ReporteRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,8 @@ class ReporteViewModel (
     private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
 
     private val _reportesRemotos = MutableStateFlow<List<ReporteDto>>(emptyList())
+    val reportesRemotos: StateFlow<List<ReporteDto>> = _reportesRemotos
+
     private val _cargando = MutableStateFlow(false)
     val cargando: StateFlow<Boolean> = _cargando
 
@@ -64,5 +67,21 @@ class ReporteViewModel (
 
     fun seleccionarCategoria(categoria: String?) {
         _categoriaSeleccionada.value = categoria
+    }
+
+    fun cargarReportesRemotos() {
+        viewModelScope.launch {
+            _cargando.value = true
+            _error.value = null
+            try {
+                _reportesRemotos.value = repository.obtenerReportesRemotos()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _error.value = "No se pudieron cargar los reportes: ${e.message}"
+            } finally {
+                _cargando.value = false
+            }
+        }
     }
 }
